@@ -145,6 +145,10 @@ body {
 .contato {
     padding: 50px 20px;
     text-align: center;
+
+    h2 {
+        margin-bottom: 25px;
+    }
 }
 
 .contato form {
