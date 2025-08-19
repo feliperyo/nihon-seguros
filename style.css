@@ -10,6 +10,7 @@ body {
     font-family: Arial, sans-serif;
     color: #333;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 /* Container base */
@@ -155,6 +156,40 @@ body {
 
 .sobre div {
     width: 50%;
+}
+
+.container-carrossel {
+    width: 100%;
+    height: 250px;
+    background-color: #c62828;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    h2 {
+        color: #fff;
+        padding: 30px 0 30px;
+    }
+
+    .carrossel {
+        width: 100%;
+        display: flex;
+        position: relative;
+
+        .item {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            left: 100%;
+            animation: autoRun 10s linear infinite;
+            -webkit-animation: autoRun 11s linear infinite;
+            animation-delay: var(--delay);
+        }
+
+        img {
+            width: 100%;
+        }
+    }
 }
 
 /* Contato */
@@ -381,5 +416,15 @@ body {
         flex-direction: column;
         text-align: center;
         gap: 20px;
+    }
+}
+
+@keyframes autoRun {
+    from {
+        left: 100%;
+    }
+
+    to {
+        left: -100px;
     }
 }
