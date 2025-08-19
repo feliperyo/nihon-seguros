@@ -111,10 +111,11 @@ body {
 
 /* Sobre */
 .sobre {
+    width: 75%;
     padding: 50px 20px;
     display: flex;
+    justify-content: center;
     gap: 20px;
-    align-items: center;
 }
 
 .sobre img {
@@ -122,6 +123,10 @@ body {
     border-radius: 8px;
     align-items: center;
     margin: 0 auto;
+}
+
+.sobre div {
+    width: 50%;
 }
 
 /* Contato */
