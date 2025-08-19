@@ -53,10 +53,26 @@ body {
     text-decoration: none;
     color: #333;
     font-weight: bold;
+    position: relative;
 }
 
 .menu a:hover {
     color: #c62828;
+}
+
+.menu a::after {
+    content: '';
+    background-color: #c62828;
+    position: absolute;
+    height: 1px;
+    left: 0;
+    bottom: -1px;
+    width: 0%;
+    transition: 0.3s;
+}
+
+.menu a:hover::after {
+    width: 100%;
 }
 
 .menu-toggle {
@@ -227,10 +243,26 @@ body {
 .footer-contact a {
     text-decoration: none;
     color: #222;
+    position: relative;
 }
 
 .footer-contact a:hover {
     color: #c62828;
+}
+
+.footer-contact a::after {
+    content: '';
+    background-color: #c62828;
+    position: absolute;
+    height: 1px;
+    left: 0;
+    bottom: -1px;
+    width: 0%;
+    transition: 0.3s;
+}
+
+.footer-contact a:hover::after {
+    width: 100%;
 }
 
 .footer-bottom {
@@ -243,10 +275,26 @@ body {
 .footer-bottom a {
     text-decoration: none;
     color: #222;
+    position: relative;
 }
 
 .footer-bottom a:hover {
     color: #c62828;
+}
+
+.footer-bottom a::after {
+    content: '';
+    background-color: #c62828;
+    position: absolute;
+    height: 1px;
+    left: 0;
+    bottom: -1px;
+    width: 0%;
+    transition: 0.3s;
+}
+
+.footer-bottom a:hover::after {
+    width: 100%;
 }
 
 /* WhatsApp fixo */
