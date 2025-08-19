@@ -65,7 +65,7 @@ body {
     content: '';
     background-color: #c62828;
     position: absolute;
-    height: 1px;
+    height: 2px;
     left: 0;
     bottom: -1px;
     width: 0%;
