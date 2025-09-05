@@ -1,69 +1,92 @@
+// Debounce function para otimizar performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Menu toggle para dispositivos móveis
 const menuToggle = document.querySelector('.menu-toggle');
 const menuList = document.querySelector('.menu ul');
 
-menuToggle.addEventListener('click', () => {
-    menuList.classList.toggle('active');
-});
-
-// Fechar menu ao clicar em um link (mobile)
-const menuLinks = document.querySelectorAll('.menu a');
-menuLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        menuList.classList.remove('active');
+if (menuToggle && menuList) {
+    menuToggle.addEventListener('click', () => {
+        menuList.classList.toggle('active');
     });
-});
 
-// Fechar menu ao clicar fora dele
-document.addEventListener('click', (e) => {
-    if (!menuToggle.contains(e.target) && !menuList.contains(e.target)) {
-        menuList.classList.remove('active');
-    }
-});
+    // Fechar menu ao clicar em um link (mobile)
+    const menuLinks = document.querySelectorAll('.menu a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            menuList.classList.remove('active');
+        });
+    });
+
+    // Fechar menu ao clicar fora dele
+    document.addEventListener('click', (e) => {
+        if (!menuToggle.contains(e.target) && !menuList.contains(e.target)) {
+            menuList.classList.remove('active');
+        }
+    });
+}
 
 // Smooth scroll para links de navegação
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
+        const targetId = this.getAttribute('href');
+        const target = document.querySelector(targetId);
+
         if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            const headerHeight = document.querySelector('.header').offsetHeight;
+            const targetPosition = target.offsetTop - headerHeight - 20;
+
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
             });
         }
     });
 });
 
-// Header transparente no scroll
+// Header com efeito de scroll otimizado
 const header = document.querySelector('.header');
-let lastScrollTop = 0;
+let isScrolled = false;
 
-window.addEventListener('scroll', () => {
+const handleHeaderScroll = debounce(() => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    // Adiciona sombra no header quando rola a página
-    if (scrollTop > 100) {
+    if (scrollTop > 100 && !isScrolled) {
         header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.15)';
-        header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+        header.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
         header.style.backdropFilter = 'blur(10px)';
-    } else {
+        isScrolled = true;
+    } else if (scrollTop <= 100 && isScrolled) {
         header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
         header.style.backgroundColor = '#fff';
         header.style.backdropFilter = 'none';
+        isScrolled = false;
     }
+}, 10);
 
-    lastScrollTop = scrollTop;
-});
+window.addEventListener('scroll', handleHeaderScroll);
 
-// Animação dos cards ao entrar na viewport
+// Intersection Observer para animações dos cards
 const observeElements = () => {
-    const cards = document.querySelectorAll('.card');
+    const cards = document.querySelectorAll('.card, .parceiro-item');
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = '1';
                 entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
             }
         });
     }, {
@@ -71,19 +94,35 @@ const observeElements = () => {
         rootMargin: '0px 0px -50px 0px'
     });
 
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-        observer.observe(card);
+    cards.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(element);
     });
 };
 
-// Formulário de contato
+// Formulário de contato otimizado com envio para WhatsApp
 const contactForm = document.querySelector('.contato form');
 if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
         e.preventDefault();
+
+        // Verifica prevenção de spam
+        if (!canSubmitForm()) return;
+
+        // Validação básica
+        const inputs = contactForm.querySelectorAll('input[required]');
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                showFieldError(input, 'Este campo é obrigatório');
+                isValid = false;
+            }
+        });
+
+        if (!isValid) return;
 
         // Pega os valores dos campos
         const nome = contactForm.querySelector('input[type="text"]').value;
@@ -92,14 +131,14 @@ if (contactForm) {
         const mensagem = contactForm.querySelector('textarea').value;
 
         // Monta a mensagem para o WhatsApp
-        const whatsappMessage = `
-Olá! Gostaria de solicitar uma cotação:
+        const whatsappMessage = `*Solicitação de Cotação - Nihon Seguros*
 
 *Nome:* ${nome}
 *E-mail:* ${email}
 *Telefone:* ${telefone}
-*Mensagem:* ${mensagem}
-        `.trim();
+*Mensagem:* ${mensagem || 'Não informada'}
+
+Enviado através do site da Nihon Seguros`;
 
         // Codifica a mensagem para URL
         const encodedMessage = encodeURIComponent(whatsappMessage);
@@ -109,15 +148,83 @@ Olá! Gostaria de solicitar uma cotação:
 
         // Limpa o formulário
         contactForm.reset();
+        clearAllErrors();
 
         // Mostra mensagem de sucesso
         showSuccessMessage();
     });
 }
 
-// Função para mostrar mensagem de sucesso
+// Validação de formulário em tempo real
+const inputs = document.querySelectorAll('.contato input, .contato textarea');
+inputs.forEach(input => {
+    input.addEventListener('blur', validateField);
+    input.addEventListener('input', () => clearError(input));
+});
+
+function validateField(e) {
+    const field = e.target;
+    const value = field.value.trim();
+
+    // Remove erro anterior
+    clearError(field);
+
+    // Validação para campos obrigatórios
+    if (field.hasAttribute('required') && !value) {
+        showFieldError(field, 'Este campo é obrigatório');
+        return;
+    }
+
+    // Validações específicas
+    if (field.type === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            showFieldError(field, 'E-mail inválido');
+        }
+    }
+
+    if (field.type === 'tel' && value) {
+        const phoneRegex = /^[\d\s\(\)\-\+]{10,}$/;
+        if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+            showFieldError(field, 'Telefone inválido');
+        }
+    }
+}
+
+function clearError(field) {
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    field.style.borderColor = '#ddd';
+}
+
+function clearAllErrors() {
+    const errors = document.querySelectorAll('.field-error');
+    errors.forEach(error => error.remove());
+    inputs.forEach(input => input.style.borderColor = '#ddd');
+}
+
+function showFieldError(field, message) {
+    field.style.borderColor = '#e74c3c';
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error';
+    errorDiv.textContent = message;
+
+    field.parentNode.insertBefore(errorDiv, field.nextSibling);
+}
+
+// Função para mostrar mensagem de sucesso otimizada
 function showSuccessMessage() {
+    // Remove mensagem anterior se existir
+    const existingMessage = document.querySelector('.success-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
     const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
     successDiv.style.cssText = `
         position: fixed;
         top: 100px;
@@ -125,14 +232,16 @@ function showSuccessMessage() {
         background: #4CAF50;
         color: white;
         padding: 15px 20px;
-        border-radius: 5px;
+        border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         z-index: 1001;
         animation: slideIn 0.3s ease;
+        max-width: 300px;
+        font-size: 14px;
     `;
     successDiv.textContent = 'Mensagem enviada! Redirecionando para o WhatsApp...';
 
-    // Adiciona animação CSS
+    // Adiciona animação CSS se não existir
     if (!document.querySelector('#success-animation')) {
         const style = document.createElement('style');
         style.id = 'success-animation';
@@ -153,39 +262,38 @@ function showSuccessMessage() {
 
     // Remove a mensagem após 3 segundos
     setTimeout(() => {
-        successDiv.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            if (successDiv.parentNode) {
-                successDiv.parentNode.removeChild(successDiv);
-            }
-        }, 300);
+        if (successDiv.parentNode) {
+            successDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 300);
+        }
     }, 3000);
 }
 
-// Lazy loading para imagens - CORRIGIDO
+// Lazy loading otimizado para imagens
 const lazyImages = document.querySelectorAll('img');
 const imageObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const img = entry.target;
 
-            // Se a imagem já carregou, só aplica a transição
             if (img.complete) {
                 img.style.opacity = '1';
-                img.style.transition = 'opacity 0.3s ease';
             } else {
-                // Se ainda não carregou, aguarda o carregamento
                 img.style.opacity = '0';
                 img.style.transition = 'opacity 0.3s ease';
 
-                img.onload = () => {
+                const imageLoader = () => {
                     img.style.opacity = '1';
+                    img.removeEventListener('load', imageLoader);
+                    img.removeEventListener('error', imageLoader);
                 };
 
-                // Fallback caso a imagem não carregue
-                img.onerror = () => {
-                    img.style.opacity = '1';
-                };
+                img.addEventListener('load', imageLoader);
+                img.addEventListener('error', imageLoader);
             }
 
             imageObserver.unobserve(img);
@@ -196,122 +304,149 @@ const imageObserver = new IntersectionObserver((entries) => {
     rootMargin: '50px'
 });
 
-// Inicializa as imagens com opacity 1 por padrão
 lazyImages.forEach(img => {
     img.style.opacity = '1';
     imageObserver.observe(img);
 });
 
-// Pausar animação do carrossel quando não está visível
-const carrossel = document.querySelector('.carrossel');
-const carrosselObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        const items = entry.target.querySelectorAll('.item');
-        if (entry.isIntersecting) {
-            items.forEach(item => {
-                item.style.animationPlayState = 'running';
-            });
+// Formatação automática do telefone
+const phoneInput = document.querySelector('input[type="tel"]');
+if (phoneInput) {
+    phoneInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length <= 10) {
+            value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
         } else {
-            items.forEach(item => {
-                item.style.animationPlayState = 'paused';
-            });
+            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
         }
+
+        e.target.value = value;
     });
-});
-
-if (carrossel) {
-    carrosselObserver.observe(carrossel);
 }
 
-// Validação de formulário em tempo real
-const inputs = document.querySelectorAll('.contato input, .contato textarea');
-inputs.forEach(input => {
-    input.addEventListener('blur', validateField);
-    input.addEventListener('input', clearError);
-});
+// Prevenção de spam no formulário
+let formSubmissionCount = 0;
+const maxSubmissions = 3;
+const resetTime = 300000; // 5 minutos
 
-function validateField(e) {
-    const field = e.target;
-    const value = field.value.trim();
-
-    // Remove erro anterior
-    clearError(e);
-
-    // Validações específicas
-    if (field.type === 'email' && value) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-            showFieldError(field, 'E-mail inválido');
-        }
+function canSubmitForm() {
+    if (formSubmissionCount >= maxSubmissions) {
+        showErrorMessage('Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.');
+        return false;
     }
 
-    if (field.type === 'tel' && value) {
-        const phoneRegex = /^[\d\s\(\)\-\+]{10,}$/;
-        if (!phoneRegex.test(value.replace(/\s/g, ''))) {
-            showFieldError(field, 'Telefone inválido');
-        }
-    }
+    formSubmissionCount++;
+
+    // Reset contador após 5 minutos
+    setTimeout(() => {
+        if (formSubmissionCount > 0) formSubmissionCount--;
+    }, resetTime);
+
+    return true;
 }
 
-function clearError(e) {
-    const field = e.target;
-    const existingError = field.parentNode.querySelector('.field-error');
-    if (existingError) {
-        existingError.remove();
-    }
-    field.style.borderColor = '#ddd';
-}
-
-function showFieldError(field, message) {
-    field.style.borderColor = '#e74c3c';
-
+function showErrorMessage(message) {
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'field-error';
     errorDiv.style.cssText = `
-        color: #e74c3c;
-        font-size: 0.9rem;
-        margin-top: 5px;
-        text-align: left;
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: #e74c3c;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        font-size: 14px;
     `;
     errorDiv.textContent = message;
 
-    field.parentNode.insertBefore(errorDiv, field.nextSibling);
+    document.body.appendChild(errorDiv);
+
+    setTimeout(() => {
+        if (errorDiv.parentNode) {
+            errorDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 300);
+        }
+    }, 4000);
 }
 
-// Inicializa as animações quando a página carrega
+// Otimização de performance: Throttle para eventos que disparam muito
+function throttle(func, limit) {
+    let inThrottle;
+    return function () {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
     observeElements();
 
     // Adiciona classe para animações CSS
     document.body.classList.add('loaded');
+
+    // Verifica se há elementos requeridos
+    const requiredElements = document.querySelectorAll('[required]');
+    requiredElements.forEach(element => {
+        element.addEventListener('invalid', (e) => {
+            e.preventDefault();
+            const message = element.validity.valueMissing ?
+                'Este campo é obrigatório' :
+                'Por favor, insira um valor válido';
+            showFieldError(element, message);
+        });
+    });
 });
 
-// Performance: debounce para scroll
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Preload de imagens importantes para melhor performance
+function preloadImages() {
+    const importantImages = [
+        './assets/Logo.webp',
+        './assets/hero-section.webp'
+    ];
+
+    importantImages.forEach(src => {
+        const img = new Image();
+        img.src = src;
+    });
 }
 
-// Aplica debounce no scroll
-const debouncedScroll = debounce(() => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+// Detecção de conexão lenta para otimizações
+if ('connection' in navigator) {
+    const connection = navigator.connection;
+    if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+        // Reduz animações para conexões lentas
+        document.body.classList.add('reduced-motion');
 
-    if (scrollTop > 100) {
-        header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.15)';
-        header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-        header.style.backdropFilter = 'blur(10px)';
-    } else {
-        header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-        header.style.backgroundColor = '#fff';
-        header.style.backdropFilter = 'none';
+        const style = document.createElement('style');
+        style.textContent = `
+            .reduced-motion * {
+                animation-duration: 0.1s !important;
+                transition-duration: 0.1s !important;
+            }
+        `;
+        document.head.appendChild(style);
     }
-}, 10);
+}
 
-window.addEventListener('scroll', debouncedScroll);
+// Inicialização final
+window.addEventListener('load', () => {
+    preloadImages();
+
+    // Remove loading states se houver
+    document.body.classList.add('fully-loaded');
+});

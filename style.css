@@ -33,6 +33,7 @@ body {
     top: 0;
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .header .container {
@@ -140,6 +141,9 @@ body {
     font-weight: bold;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(198, 40, 40, 0.3);
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
 }
 
 .btn:hover {
@@ -213,6 +217,7 @@ body {
     width: 60px;
     height: 60px;
     transition: transform 0.3s ease;
+    object-fit: contain;
 }
 
 .card:hover img {
@@ -262,69 +267,60 @@ body {
     color: #555;
 }
 
-/* Carrossel */
-.container-carrossel {
-    width: 100%;
-    height: 250px;
+/* Parceiros - Seção Estática */
+.parceiros-section {
+    padding: 80px 0;
     background: linear-gradient(135deg, #c62828, #a21e1e);
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
+    text-align: center;
 }
 
-.container-carrossel h2 {
+.parceiros-section h2 {
     color: #fff;
-    padding: 30px 0;
-    font-size: 2.2rem;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.carrossel {
-    width: 100%;
-    height: 120px;
-    display: flex;
-    position: relative;
-    overflow: hidden;
+.parceiros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
-.carrossel .item {
-    width: 100px;
-    height: 80px;
-    position: absolute;
-    left: 100%;
-    animation: autoRun 15s linear infinite;
-    animation-delay: var(--delay);
+.parceiro-item {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    min-height: 100px;
 }
 
-.carrossel .item img {
+.parceiro-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 1);
+}
+
+.parceiro-item img {
     width: 100%;
-    height: 100%;
+    height: auto;
+    max-width: 120px;
+    max-height: 60px;
     object-fit: contain;
-    filter: grayscale(0.3);
-    transition: filter 0.3s ease;
+    filter: grayscale(0.2);
+    transition: all 0.3s ease;
 }
 
-.carrossel .item:hover img {
+.parceiro-item:hover img {
     filter: grayscale(0);
-}
-
-@keyframes autoRun {
-    from {
-        left: 100%;
-    }
-
-    to {
-        left: -120px;
-    }
+    transform: scale(1.05);
 }
 
 /* Contato */
@@ -356,6 +352,7 @@ body {
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+    font-family: inherit;
 }
 
 .contato input:focus,
@@ -367,12 +364,6 @@ body {
 .contato textarea {
     min-height: 120px;
     resize: vertical;
-}
-
-.contato button {
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
 }
 
 .pre-footer {
@@ -540,6 +531,14 @@ body {
     box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
 }
 
+/* Animações */
+.field-error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-align: left;
+}
+
 /* Responsividade */
 @media(max-width: 1024px) {
     .sobre {
@@ -560,6 +559,11 @@ body {
 
     .hero h1 {
         font-size: 2.5rem;
+    }
+
+    .parceiros-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 20px;
     }
 }
 
@@ -621,26 +625,32 @@ body {
 
     .beneficios h2,
     .contato h2,
-    .sobre h2 {
+    .sobre h2,
+    .parceiros-section h2 {
         font-size: 2rem;
     }
 
-    .container-carrossel {
-        height: 200px;
+    .parceiros-section {
+        padding: 60px 0;
     }
 
-    .container-carrossel h2 {
-        font-size: 1.8rem;
-        padding: 20px 0;
+    .parceiros-section h2 {
+        margin-bottom: 40px;
     }
 
-    .carrossel {
-        height: 100px;
+    .parceiros-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
     }
 
-    .carrossel .item {
-        width: 80px;
-        height: 60px;
+    .parceiro-item {
+        padding: 15px;
+        min-height: 80px;
+    }
+
+    .parceiro-item img {
+        max-width: 80px;
+        max-height: 45px;
     }
 }
 
@@ -661,7 +671,8 @@ body {
 
     .beneficios h2,
     .contato h2,
-    .sobre h2 {
+    .sobre h2,
+    .parceiros-section h2 {
         font-size: 1.8rem;
     }
 
@@ -695,5 +706,20 @@ body {
         width: 55px;
         height: 55px;
         font-size: 28px;
+    }
+
+    .parceiros-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .parceiro-item {
+        padding: 10px;
+        min-height: 60px;
+    }
+
+    .parceiro-item img {
+        max-width: 60px;
+        max-height: 35px;
     }
 }
