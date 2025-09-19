@@ -3,10 +3,9 @@ Nihon Corretora de Seguros</h1>
 <br>
 <h3 align="center">Projeto utilizando HTML, CSS e JavaScript.</h3>
 <br>
-<br>
 
 <div align="center">
-  <img width="800px" src="https://github.com/feliperyo/nihon-seguros/blob/main/assets/mockup.png?raw=true"/>
+  <img width="600px" src="https://github.com/feliperyo/nihon-seguros/blob/main/assets/mockup.png?raw=true"/>
 </div>
 <br>
 <div align="center">
