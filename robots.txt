@@ -1,0 +1,20 @@
+# Nihon Seguros - robots.txt
+# https://nihoncorretoradeseguros.com.br/
+
+User-agent: *
+Allow: /
+Disallow: /.git/
+Disallow: /.vscode/
+
+# Sitemap
+Sitemap: https://nihoncorretoradeseguros.com.br/sitemap.xml
+
+# Google
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
